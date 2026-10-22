@@ -1,9 +1,10 @@
-"""第 0 階段：固定報酬率的現金流模擬。
+"""第 0 階段：固定報酬率的現金流模擬（deterministic cash-flow simulation）。
 
 每個月的順序：
-1. 各資產依各自的月報酬率成長
-2. 薪水 × 投入比例 的金額，依配置比例投入各資產（月底投入）
-3. 每滿 12 個月：薪水調漲；若開啟再平衡，把總資產重新依配置比例分配
+1. 各資產依各自的月報酬率（monthly return）成長
+2. 薪水 × 投入比例 的金額，依配置比例（allocation weights）投入各資產
+   （月底投入，對應期末年金 ordinary annuity）
+3. 每滿 12 個月：薪水調漲；若開啟再平衡（rebalancing），把總資產重新依配置比例分配
 """
 
 from dataclasses import dataclass, field
@@ -39,7 +40,10 @@ class Params:
 
 
 def monthly_rate(annual_rate: float) -> float:
-    """年化報酬率換成等效月報酬率：(1 + r)^(1/12) - 1。"""
+    """年化報酬率（annualized return）換成等效月報酬率（equivalent monthly rate）：(1 + r)^(1/12) - 1。
+
+    不用 r/12：那是名目利率（nominal rate）的換算，複利一年後會超過 r。
+    """
     return (1 + annual_rate) ** (1 / 12) - 1
 
 
