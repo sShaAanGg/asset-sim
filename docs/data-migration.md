@@ -10,6 +10,13 @@ The format of local data (scenarios（情境）, and later real balance history 
 
 The code is in `src/assetsim/scenarios.py`: `SCHEMA_VERSION` is the current version, and `_migrate()` upgrades older data.
 
+### Version history（版本紀錄）
+
+| Version | Change | Migration |
+|---|---|---|
+| 1 | `savings_rate`, `allocation`, `annual_returns` | — |
+| 2 | Per-asset `Asset` (dividends, expense ratio, fees, sell tax); `monthly_expenses` + `inflation`, `bonus_months`, emergency fund, NHI supplement, dividend tax | `_v1_to_v2`: sets `monthly_expenses = salary × (1 − savings_rate)` and `inflation = annual_raise`, everything new to 0, so results are identical to v1. Tested against `tests/fixtures/scenarios/v1_example.json`. |
+
 ## Safety rules（安全原則）
 
 1. **Back up first, then migrate（先備份，再遷移）.** Copy the whole folder, e.g. `cp -a data/ data.bak-$(date +%Y%m%d)/`. Never run a migration without a backup.
