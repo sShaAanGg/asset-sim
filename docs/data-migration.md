@@ -1,32 +1,32 @@
-# 資料遷移指南
+# Data Migration Guide
 
-本機資料（情境、之後的實際資產紀錄、價格資料）的格式會隨著專案改變。這份指南說明怎麼改格式，又不弄丟、弄壞資料，以及資料變大後該怎麼做。
+The format of local data (scenarios, and later real balance history and price data) will change as the project grows. This guide explains how to change a format without losing or corrupting data, and what to do once the data gets big.
 
-## 現況
+## Current state
 
-| 資料 | 格式 | 位置 | 版本記在哪 |
+| Data | Format | Location | Where the version lives |
 |---|---|---|---|
-| 情境（`Params`） | 每個情境一個 JSON 檔 | `data/scenarios/`（或 `$ASSETSIM_DATA_DIR/scenarios/`） | 每個檔案的 `"version"` 欄位 |
+| Scenarios (`Params`) | One JSON file per scenario | `data/scenarios/` (or `$ASSETSIM_DATA_DIR/scenarios/`) | The `"version"` field in each file |
 
-程式在 `src/assetsim/scenarios.py`：`SCHEMA_VERSION` 是目前版本，`_migrate()` 負責把舊版資料升級。
+The code is in `src/assetsim/scenarios.py`: `SCHEMA_VERSION` is the current version, and `_migrate()` upgrades older data.
 
-## 安全原則（不論資料大小）
+## Safety rules (at any data size)
 
-1. **先備份，再遷移。** 整個資料夾複製一份，例如 `cp -a data/ data.bak-$(date +%Y%m%d)/`。沒有備份就不要跑遷移。
-2. **不要原地修改。** 新資料寫到暫存檔或新資料夾，全部成功後再替換（`save_params` 已經是先寫 `.tmp` 再 `replace`）。中途當掉時，舊資料還是完整的。
-3. **一次只升一版。** `_migrate` 裡寫成一連串的 `v1 → v2`、`v2 → v3`，不要寫 `v1 → v3` 的捷徑。這樣每一步都小、容易測試，任何舊版本都能一路升上來。
-4. **遷移要能重跑（idempotent）。** 已經是新版的資料，再跑一次也不會壞掉。中斷後直接重跑就好。
-5. **舊版本的檔案留作測試資料。** 改版時，把一個舊版檔案放進 `tests/fixtures/`，並寫測試確認它能升到最新版，且內容正確。這是保證「以前存的檔案還能讀」的唯一方法。
-6. **遷移後要驗證。** 至少比對：筆數一樣、每筆都能成功載入、關鍵欄位的總和或 checksum 一樣。先用 dry-run（只檢查、不寫入）跑一次。
-7. **只往前升，不往回降。** 要回到舊版，就用備份還原，不要寫降版的程式。
+1. **Back up first, then migrate.** Copy the whole folder, e.g. `cp -a data/ data.bak-$(date +%Y%m%d)/`. Never run a migration without a backup.
+2. **Never modify in place.** Write new data to a temp file or a new folder, and swap it in only after everything succeeds (`save_params` already writes a `.tmp` file and then calls `replace`). If something crashes halfway, the old data is still intact.
+3. **Upgrade one version at a time.** Write `_migrate` as a chain of `v1 → v2`, `v2 → v3` steps, never a `v1 → v3` shortcut. Each step stays small and easy to test, and any old version can be upgraded all the way to the latest.
+4. **Make migrations idempotent.** Running a migration again on data that is already up to date must not break it. If a run is interrupted, just run it again.
+5. **Keep old-version files as test data.** On every format change, put a file in the old format into `tests/fixtures/` and write a test that upgrades it to the latest version and checks the content. This is the only way to guarantee that files saved earlier can still be read.
+6. **Verify after migrating.** At minimum, check that the record count is unchanged, every record loads, and the sums or checksums of key fields match. Do a dry-run (check only, no writes) first.
+7. **Only upgrade, never downgrade.** To go back to an old version, restore the backup instead of writing downgrade code.
 
-## 改版步驟（JSON 情境）
+## Steps for a format change (JSON scenarios)
 
-以「在 `Params` 加入 `inflation` 欄位」為例：
+Example: adding an `inflation` field to `Params`.
 
-1. 在 `Params` 加欄位，並給預設值。
-2. `SCHEMA_VERSION` 改成 `2`。
-3. 在 `_migrate` 加一步：
+1. Add the field to `Params` with a default value.
+2. Change `SCHEMA_VERSION` to `2`.
+3. Add a step to `_migrate`:
 
    ```python
    def _migrate(data: dict) -> dict:
@@ -39,35 +39,35 @@
        return data
    ```
 
-4. 放一個 v1 檔案到 `tests/fixtures/`，寫測試確認它載入後 `inflation == 0.02`。
-5. 決定要**延遲遷移**還是**一次全部遷移**（見下一節）。
+4. Put a v1 file in `tests/fixtures/` and write a test checking that it loads with `inflation == 0.02`.
+5. Decide between **lazy migration** and **migrating everything at once** (see the next section).
 
-### 延遲遷移 vs 一次全部遷移
+### Lazy vs eager migration
 
-- **延遲遷移（lazy）**：檔案維持舊版，讀取時才在記憶體裡升級；下次儲存時就自然變成新版。這是現在的做法，不需要額外步驟，適合檔案少的情況。缺點是磁碟上會同時有多種版本，所以 `_migrate` 裡的舊步驟不能刪。
-- **一次全部遷移（eager）**：寫一個腳本，把每個檔案讀出、升級、用 `save_params` 寫回。適合想刪掉很舊的遷移程式，或是要換儲存格式的時候。
+- **Lazy:** files stay in the old version and are upgraded in memory when read; the next save writes them in the new version. This is the current approach. It needs no extra steps and suits a small number of files. The downside is that several versions coexist on disk, so old steps in `_migrate` can never be removed.
+- **Eager:** a script reads every file, upgrades it, and writes it back with `save_params`. Use this when you want to delete very old migration code, or when switching to a different storage format.
 
-## 資料變大時
+## When the data gets big
 
-### 大概多大會出問題
+### Roughly when it becomes a problem
 
-- 情境 JSON 每個大約 1 KB。就算有幾千個，全部讀一次也不到一秒，**JSON 一個檔一個情境可以撐很久**。
-- 真正會變大的是**時間序列**：每月的實際資產紀錄、每日的價格資料、存下來的模擬結果（蒙地卡羅一次就可能有 10 萬條路徑）。這些不要放進 JSON。
+- Each scenario JSON is about 1 KB. Even with thousands of them, reading them all takes under a second, so **one JSON file per scenario will last a long time**.
+- What actually grows is **time-series data**: monthly real balance records, daily prices, and saved simulation results (a single Monte Carlo run can have 100,000 paths). Don't put these in JSON.
 
-| 資料 | 建議格式 | 理由 |
+| Data | Recommended format | Why |
 |---|---|---|
-| 設定、情境 | JSON | 小、人看得懂、好 diff |
-| 會一直增加的紀錄（實際資產、交易） | SQLite | 可以只新增一筆、可以查詢、有交易（transaction） |
-| 大量數值（價格、模擬結果） | Parquet | 欄式壓縮、pandas 讀寫很快、可以只讀需要的欄位 |
+| Settings, scenarios | JSON | Small, human-readable, easy to diff |
+| Records that keep growing (real balances, transactions) | SQLite | Append one row at a time, query it, transactions |
+| Large numeric data (prices, simulation results) | Parquet | Columnar compression, fast pandas reads and writes, read only the columns you need |
 
-### 遷移到 SQLite
+### Migrating SQLite
 
-SQLite 檔案本身沒有「每筆一個版本」，改用整個資料庫的版本號：`PRAGMA user_version`。
+A SQLite file has no per-record version, so use a version number for the whole database: `PRAGMA user_version`.
 
 ```python
 import sqlite3
 
-MIGRATIONS = {  # 版本 n → n+1 的 SQL
+MIGRATIONS = {  # SQL that upgrades version n to n+1
     0: "CREATE TABLE snapshots (date TEXT, asset TEXT, value REAL, PRIMARY KEY (date, asset))",
     1: "ALTER TABLE snapshots ADD COLUMN currency TEXT NOT NULL DEFAULT 'TWD'",
 }
@@ -75,41 +75,41 @@ MIGRATIONS = {  # 版本 n → n+1 的 SQL
 def migrate(conn: sqlite3.Connection) -> None:
     version = conn.execute("PRAGMA user_version").fetchone()[0]
     while version in MIGRATIONS:
-        with conn:  # 一個 transaction：成功才 commit，失敗就全部 rollback
+        with conn:  # one transaction: commit on success, roll everything back on failure
             conn.execute(MIGRATIONS[version])
             conn.execute(f"PRAGMA user_version = {version + 1}")
         version += 1
 ```
 
-重點：
+Key points:
 
-- **每一步都包在 transaction 裡**，失敗時資料庫會停在上一個完整的版本。
-- **備份用 `sqlite3 data/app.db ".backup data/app.db.bak"`** 或 Python 的 `conn.backup()`，不要在程式還開著資料庫時直接 `cp`。
-- **加欄位用 `ALTER TABLE ... ADD COLUMN`**，很快，不用重寫整個表。改型別、刪欄位、改主鍵這類大改，要「建新表 → `INSERT INTO new SELECT ... FROM old` → 刪舊表 → 改名」，四步放在同一個 transaction 裡。
-- **大量寫入要批次處理**：用 `executemany`，並在同一個 transaction 裡寫完，不要每一筆都 commit（差距可以到上百倍）。
-- 大表重建完，跑一次 `VACUUM` 把空間還給磁碟。
+- **Wrap every step in a transaction**, so a failure leaves the database at the previous complete version.
+- **Back up with `sqlite3 data/app.db ".backup data/app.db.bak"`** or Python's `conn.backup()`. Don't `cp` the file while a program has the database open.
+- **Add columns with `ALTER TABLE ... ADD COLUMN`.** It's fast and doesn't rewrite the table. Bigger changes, such as changing a type, dropping a column, or changing the primary key, need "create new table → `INSERT INTO new SELECT ... FROM old` → drop old table → rename", with all four steps in the same transaction.
+- **Batch large writes:** use `executemany` and write everything in one transaction instead of committing after each row (the difference can be 100x or more).
+- After rebuilding a large table, run `VACUUM` to give the space back to the disk.
 
-### 從 JSON 搬到 SQLite（之後如果需要）
+### Moving from JSON to SQLite (if needed later)
 
-1. 備份 `data/`。
-2. 寫腳本：讀所有 JSON（經過 `_migrate`，確保都是最新版），寫進新的 `.db` 檔，**整批放在一個 transaction**。
-3. 驗證：筆數一樣，每個情境從 DB 讀回來和從 JSON 讀的 `Params` 相等（可以直接寫成測試）。
-4. 程式改成讀 DB；舊的 JSON 資料夾改名成 `scenarios.migrated/` 保留一段時間，確定沒問題再刪。
+1. Back up `data/`.
+2. Write a script that reads every JSON file (through `_migrate`, so they're all at the latest version) and writes them into a new `.db` file, **all in one transaction**.
+3. Verify: the counts match, and every scenario read back from the DB equals the `Params` read from JSON (this can be a test).
+4. Switch the code to read from the DB. Rename the old JSON folder to `scenarios.migrated/` and keep it for a while; delete it once you're sure everything works.
 
-### Parquet 資料
+### Parquet data
 
-Parquet 檔案寫好就不再修改，所以「遷移」就是重寫一份：
+Parquet files aren't modified after they're written, so "migrating" means writing a new copy:
 
-- 讀舊檔 → 轉換 → 寫到新路徑 → 驗證 → 替換。不要覆蓋原檔。
-- 資料很大時**分區（partition）**存放，例如每年或每個代號一個檔（`data/prices/ticker=0050.TW/year=2026.parquet`）。遷移時一次處理一個分區，記憶體不會爆，中斷了也只要重跑沒完成的分區。
-- 版本記在檔案的 metadata，或資料夾名稱（`prices_v2/`）。
-- 下載的價格資料其實可以重新下載，遷移失敗最壞就是重抓；**使用者自己輸入的資料（情境、實際資產紀錄）不能重建，所以要特別小心**。
+- Read the old file → transform → write to a new path → verify → swap. Don't overwrite the original.
+- For large data, **partition** it, e.g. one file per year or per ticker (`data/prices/ticker=0050.TW/year=2026.parquet`). Migrate one partition at a time so memory stays bounded, and after an interruption only the unfinished partitions need rerunning.
+- Record the version in the file metadata or in the folder name (`prices_v2/`).
+- Downloaded price data can be downloaded again, so the worst case for a failed migration is re-fetching it. **Data you entered yourself (scenarios, real balance records) can't be rebuilt, so be especially careful with it.**
 
-## 檢查清單
+## Checklist
 
-- [ ] 備份了整個資料資料夾
-- [ ] 遷移一次只升一版，每一步都有測試，並用舊版的 fixture 檔測過
-- [ ] 先 dry-run，再真的寫入
-- [ ] 寫入到新位置或包在 transaction 裡，成功才替換
-- [ ] 驗證筆數、能不能載入、關鍵數值
-- [ ] 舊資料保留一段時間再刪
+- [ ] Backed up the whole data folder
+- [ ] Each migration step upgrades one version, has a test, and was tested against an old-version fixture file
+- [ ] Ran a dry-run before writing for real
+- [ ] Writes go to a new location or happen inside a transaction, swapped in only on success
+- [ ] Verified counts, that every record loads, and key values
+- [ ] Kept the old data for a while before deleting it
