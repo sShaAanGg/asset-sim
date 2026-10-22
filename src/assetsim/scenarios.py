@@ -17,7 +17,7 @@ from pathlib import Path
 
 from assetsim.cashflow import Params
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -52,7 +52,7 @@ def save_params(p: Params, name: str, directory: Path | None = None) -> Path:
 
 def load_params(name: str, directory: Path | None = None) -> Params:
     data = json.loads(_path(name, directory).read_text(encoding="utf-8"))
-    p = Params(**_migrate(data)["params"])
+    p = Params.from_dict(_migrate(data)["params"])
     p.validate()
     return p
 
@@ -61,9 +61,31 @@ def delete_scenario(name: str, directory: Path | None = None) -> None:
     _path(name, directory).unlink()
 
 
+def _v1_to_v2(params: dict) -> dict:
+    """v1：每月投入 = 薪水 × savings_rate，報酬率不分股息與費用。
+    v2：結餘 = 薪水 − 開銷，每種資產各自設定股息、費用、稅。
+
+    把開銷設成 薪水 × (1 − savings_rate)，並讓開銷和薪水以相同幅度成長，
+    每月投入金額就和 v1 完全相同；其他新項目（年終、緊急預備金、費用、股息）都設為 0。
+    """
+    old = {k: v for k, v in params.items() if k not in ("savings_rate", "allocation", "annual_returns")}
+    return {
+        **old,
+        "monthly_expenses": params["monthly_salary"] * (1 - params["savings_rate"]),
+        "inflation": params["annual_raise"],
+        "bonus_months": 0.0,
+        "emergency_months": 0.0,
+        "assets": {n: {"weight": w, "price_return": params["annual_returns"][n]}
+                   for n, w in params["allocation"].items()},
+    }
+
+
 def _migrate(data: dict) -> dict:
-    """把舊版格式逐版升級到 SCHEMA_VERSION。目前只有第 1 版。"""
+    """把舊版格式逐版升級到 SCHEMA_VERSION，一次升一版（見 docs/data-migration.md）。"""
     version = data.get("version")
+    if version == 1:
+        data = {"version": 2, "params": _v1_to_v2(data["params"])}
+        version = 2
     if version != SCHEMA_VERSION:
         raise ValueError(f"不支援的情境檔版本：{version}（目前是 {SCHEMA_VERSION}）")
     return data

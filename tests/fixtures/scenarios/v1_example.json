@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "params": {
+    "initial_assets": 500000,
+    "monthly_salary": 55000,
+    "annual_raise": 0.025,
+    "savings_rate": 0.35,
+    "allocation": {
+      "ETF": 0.7,
+      "股票": 0.2,
+      "現金": 0.1
+    },
+    "annual_returns": {
+      "ETF": 0.07,
+      "股票": 0.09,
+      "現金": 0.01
+    },
+    "years": 25,
+    "rebalance": true
+  }
+}
