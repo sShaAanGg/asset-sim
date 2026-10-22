@@ -22,6 +22,7 @@ src/assetsim/     模擬引擎與共用程式
   plotting.py     matplotlib 中文字型設定
   scenarios.py    把設定存成具名情境（JSON），可再載入
 tests/            驗證數學與模擬的正確性
+docs/             開發文件（例如 data-migration.md：資料格式改版時怎麼安全遷移）
 data/             下載的價格資料、存下的情境（不進 git；可用 ASSETSIM_DATA_DIR 改位置）
 app.py            Streamlit 介面
 ```
