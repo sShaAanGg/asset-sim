@@ -124,7 +124,7 @@
 
 ## 學習資源
 
-### 主軸：機率統計（probability & statistics）
+### 機率統計（probability & statistics）
 
 | 資源 | 特色 | 用在哪裡 |
 |---|---|---|
@@ -133,7 +133,7 @@
 | **StatQuest**（Josh Starmer，YouTube） | 統計和 ML 概念講得非常白話，一支一個主題 | 全程，遇到不懂的概念就查 |
 | **Harvard Stat 110**（Joe Blitzstein）＋《Introduction to Probability》（Blitzstein & Hwang，免費 PDF） | 最紮實的機率課，難度較高 | 想深入時；第 5 階段的馬可夫鏈 |
 
-### 數學工具：只學夠用的部分
+### 其他數學工具
 
 | 資源 | 必看 | 用在哪裡 |
 |---|---|---|
