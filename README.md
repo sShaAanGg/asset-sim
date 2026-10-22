@@ -19,8 +19,9 @@ src/assetsim/     模擬引擎與共用程式
   cashflow.py     逐月現金流模擬（Params, simulate）
   formulas.py     複利與年金的封閉解，用來驗證模擬
   plotting.py     matplotlib 中文字型設定
+  scenarios.py    把設定存成具名情境（JSON），可再載入
 tests/            驗證數學與模擬的正確性
-data/             下載的價格資料（不進 git）
+data/             下載的價格資料、存下的情境（不進 git；可用 ASSETSIM_DATA_DIR 改位置）
 app.py            Streamlit 介面
 ```
 
