@@ -1,7 +1,6 @@
 # 學習計畫
 
 每個階段替模擬器加一個新功能，並學一個數學 / ML 主題。
-主軸是**機率統計與蒙地卡羅模擬（probability, statistics & Monte Carlo simulation）**；微積分和線性代數是工具，需要時學「夠用」的部分。
 
 ## 原則
 
