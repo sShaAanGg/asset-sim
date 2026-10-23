@@ -1,69 +1,75 @@
 # Data Migration Guide（資料遷移指南）
 
-The format of local data (scenarios（情境）, and later real balance history and price data) will change as the project grows. This guide explains how to change a format without losing or corrupting data, and what to do once the data gets big.
+The format of local data (plans（方案）, and later real balance history and price data) will change as the project grows. This guide explains how to change a format without losing or corrupting data, and what to do once the data gets big.
 
 ## Current state
 
 | Data | Format | Location | Where the version lives |
 |---|---|---|---|
-| Scenarios (`Params`) | One JSON file per scenario | `data/scenarios/` (or `$ASSETSIM_DATA_DIR/scenarios/`) | The `"version"` field in each file |
+| Plans (`Params`) | One JSON file per plan | `data/plans/` (or `$ASSETSIM_DATA_DIR/plans/`) | The `"version"` field in each file |
+| Settings (default plan) | One JSON file | `data/settings.json` | Its own `"version"` field (`SETTINGS_VERSION`) |
 
-The code is in `src/assetsim/scenarios.py`: `SCHEMA_VERSION` is the current version, and `_migrate()` upgrades older data.
+The code is in `src/assetsim/plans.py`: `SCHEMA_VERSION` is the current plan format version, and `_migrate()` upgrades older plan files. The settings file is versioned separately, so the two formats can change independently.
 
 ### Version history（版本紀錄）
 
 | Version | Change | Migration |
 |---|---|---|
 | 1 | `savings_rate`, `allocation`, `annual_returns` | — |
-| 2 | Per-asset `Asset` (dividends, expense ratio, fees, sell tax); `monthly_expenses` + `inflation`, `bonus_months`, emergency fund, NHI supplement, dividend tax | `_v1_to_v2`: sets `monthly_expenses = salary × (1 − savings_rate)` and `inflation = annual_raise`, everything new to 0, so results are identical to v1. Tested against `tests/fixtures/scenarios/v1_example.json`. |
+| 2 | Per-asset `Asset` (dividends, expense ratio, fees, sell tax); `monthly_expenses` + `inflation`, `bonus_months`, emergency fund, NHI supplement, dividend tax | `_v1_to_v2`: sets `monthly_expenses = salary × (1 − savings_rate)` and `inflation = annual_raise`, everything new to 0, so results are identical to v1. Tested against `tests/fixtures/plans/v1_example.json`. |
 
 ## Safety rules（安全原則）
 
 1. **Back up first, then migrate（先備份，再遷移）.** Copy the whole folder, e.g. `cp -a data/ data.bak-$(date +%Y%m%d)/`. Never run a migration without a backup.
-2. **Never modify in place（不要原地修改）.** Write new data to a temp file or a new folder, and swap it in only after everything succeeds (`save_params` already writes a `.tmp` file and then calls `replace`). If something crashes halfway, the old data is still intact.
+2. **Never modify in place（不要原地修改）.** Write new data to a temp file or a new folder, and swap it in only after everything succeeds (`save_plan` already writes a `.tmp` file and then calls `replace`). If something crashes halfway, the old data is still intact.
 3. **Upgrade one version at a time（一次只升一版）.** Write `_migrate` as a chain of `v1 → v2`, `v2 → v3` steps, never a `v1 → v3` shortcut. Each step stays small and easy to test, and any old version can be upgraded all the way to the latest.
 4. **Make migrations idempotent（可重跑、冪等）.** Running a migration again on data that is already up to date must not break it. If a run is interrupted, just run it again.
 5. **Keep old-version files as test data（測試資料，fixture）.** On every format change, put a file in the old format into `tests/fixtures/` and write a test that upgrades it to the latest version and checks the content. This is the only way to guarantee that files saved earlier can still be read.
 6. **Verify after migrating（遷移後驗證）.** At minimum, check that the record count is unchanged, every record loads, and the sums or checksums of key fields match. Do a dry-run（試跑） (check only, no writes) first.
 7. **Only upgrade, never downgrade（只升版，不降版）.** To go back to an old version, restore the backup instead of writing downgrade code.
 
-## Steps for a format change（改版步驟，JSON 情境）
+## Steps for a format change（改版步驟，JSON 方案）
 
-Example: adding an `inflation` field to `Params`.
+The real v1 → v2 step is `_v1_to_v2` in `src/assetsim/plans.py`, tested in `tests/test_plans.py`. The next change follows the same pattern. Example: a future v3 that adds a `withdrawal_rate` field to `Params` for the retirement phase.
 
 1. Add the field to `Params` with a default value.
-2. Change `SCHEMA_VERSION` to `2`.
-3. Add a step to `_migrate`:
+2. Change `SCHEMA_VERSION` to `3`.
+3. Add a step to `_migrate`, after the existing v1 → v2 step:
 
    ```python
    def _migrate(data: dict) -> dict:
        version = data.get("version")
        if version == 1:
-           data = {"version": 2, "params": {**data["params"], "inflation": 0.02}}
+           data = {"version": 2, "params": _v1_to_v2(data["params"])}
            version = 2
+       if version == 2:
+           data = {"version": 3, "params": {**data["params"], "withdrawal_rate": 0.0}}
+           version = 3
        if version != SCHEMA_VERSION:
-           raise ValueError(f"不支援的情境檔版本：{version}（目前是 {SCHEMA_VERSION}）")
+           raise ValueError(f"不支援的方案檔版本：{version}（目前是 {SCHEMA_VERSION}）")
        return data
    ```
 
-4. Put a v1 file in `tests/fixtures/` and write a test checking that it loads with `inflation == 0.02`.
-5. Decide between **lazy migration** and **migrating everything at once** (see the next section).
+   Pick defaults for new fields that keep old plans' results unchanged (here, no withdrawals), as `_v1_to_v2` does.
+4. Put a v2 file in `tests/fixtures/plans/` next to `v1_example.json`, and write tests that both load and give the expected results.
+5. Add a row to the version history table above.
+6. Decide between **lazy migration** and **migrating everything at once** (see the next section).
 
 ### Lazy vs eager migration（延遲遷移 vs 一次全部遷移）
 
 - **Lazy:** files stay in the old version and are upgraded in memory when read; the next save writes them in the new version. This is the current approach. It needs no extra steps and suits a small number of files. The downside is that several versions coexist on disk, so old steps in `_migrate` can never be removed.
-- **Eager:** a script reads every file, upgrades it, and writes it back with `save_params`. Use this when you want to delete very old migration code, or when switching to a different storage format.
+- **Eager:** a script reads every file, upgrades it, and writes it back with `save_plan`. Use this when you want to delete very old migration code, or when switching to a different storage format.
 
 ## When the data gets big（資料變大時）
 
 ### Roughly when it becomes a problem
 
-- Each scenario JSON is about 1 KB. Even with thousands of them, reading them all takes under a second, so **one JSON file per scenario will last a long time**.
+- Each plan JSON is about 1 KB. Even with thousands of them, reading them all takes under a second, so **one JSON file per plan will last a long time**.
 - What actually grows is **time-series data（時間序列）**: monthly real balance records, daily prices, and saved simulation results (a single Monte Carlo run can have 100,000 paths). Don't put these in JSON.
 
 | Data | Recommended format | Why |
 |---|---|---|
-| Settings, scenarios | JSON | Small, human-readable, easy to diff |
+| Settings, plans | JSON | Small, human-readable, easy to diff |
 | Records that keep growing (real balances, transactions) | SQLite | Append one row at a time, query it, transactions |
 | Large numeric data (prices, simulation results) | Parquet | Columnar（欄式） compression, fast pandas reads and writes, read only the columns you need |
 
@@ -100,8 +106,8 @@ Key points:
 
 1. Back up `data/`.
 2. Write a script that reads every JSON file (through `_migrate`, so they're all at the latest version) and writes them into a new `.db` file, **all in one transaction**.
-3. Verify: the counts match, and every scenario read back from the DB equals the `Params` read from JSON (this can be a test).
-4. Switch the code to read from the DB. Rename the old JSON folder to `scenarios.migrated/` and keep it for a while; delete it once you're sure everything works.
+3. Verify: the counts match, and every plan read back from the DB equals the `Params` read from JSON (this can be a test).
+4. Switch the code to read from the DB. Rename the old JSON folder to `plans.migrated/` and keep it for a while; delete it once you're sure everything works.
 
 ### Parquet data
 
@@ -110,7 +116,7 @@ Parquet files aren't modified after they're written, so "migrating" means writin
 - Read the old file → transform → write to a new path → verify → swap. Don't overwrite the original.
 - For large data, **partition（分區）** it, e.g. one file per year or per ticker (`data/prices/ticker=0050.TW/year=2026.parquet`). Migrate one partition at a time so memory stays bounded, and after an interruption only the unfinished partitions need rerunning.
 - Record the version in the file metadata or in the folder name (`prices_v2/`).
-- Downloaded price data can be downloaded again, so the worst case for a failed migration is re-fetching it. **Data you entered yourself (scenarios, real balance records) can't be rebuilt, so be especially careful with it.**
+- Downloaded price data can be downloaded again, so the worst case for a failed migration is re-fetching it. **Data you entered yourself (plans, real balance records) can't be rebuilt, so be especially careful with it.**
 
 ## Checklist（檢查清單）
 
