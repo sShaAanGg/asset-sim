@@ -27,7 +27,13 @@ tests/            驗證數學與模擬的正確性
 docs/             文件：usage.md（使用說明）、data-migration.md（資料格式改版時怎麼安全遷移）
 data/             下載的價格資料、存下的方案（不進 git；可用 ASSETSIM_DATA_DIR 改位置）
 app.py            Streamlit 介面
+.github/workflows/ci.yml  CI：每個 PR 與 main 上都跑 pytest
+CONTRIBUTING.md   怎麼把修改合進 main，以及 CI 關卡的規則
 ```
+
+## 貢獻
+
+所有修改都透過 PR 合進 `main`，CI 的 `test` 檢查要通過才能合併。流程與規則請見 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 學習計畫
 
