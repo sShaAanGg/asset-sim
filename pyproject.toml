@@ -3,6 +3,8 @@ name = "assetsim"
 version = "0.1.0"
 description = "Personal asset growth simulator + ML learning project"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     { name = "TomTseng", email = "76196301+sShaAanGg@users.noreply.github.com" }
 ]
