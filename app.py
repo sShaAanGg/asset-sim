@@ -69,7 +69,7 @@ with st.sidebar:
     st.header("收入與投入")
     initial = st.number_input("起始資產 (TWD)", 0, 100_000_000, step=100_000, key="initial")
     salary = st.number_input("月薪 (TWD)", 0, 2_000_000, step=5_000, key="salary")
-    raise_pct = st.slider("每年加薪 %", 0.0, 10.0, step=0.5, key="raise_pct")
+    raise_pct = st.slider("每年加薪 %", 0.0, 50.0, step=0.5, key="raise_pct")
     savings_pct = st.slider("薪水投入比例 %", 0, 100, key="savings_pct")
     years = st.slider("模擬年數", 1, 50, key="years")
 
