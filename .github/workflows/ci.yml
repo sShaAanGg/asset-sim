@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+      # 不裝 ml 群組：PyTorch + CUDA 有好幾 GB，測試用不到
+      - name: Install dependencies (without the ml group)
+        run: uv sync --locked --no-group ml
+      # --no-sync：不然 uv run 會照 default-groups 再把 ml 群組裝回來
+      - name: Run tests
+        run: uv run --no-sync pytest
