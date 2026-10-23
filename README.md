@@ -12,6 +12,8 @@ uv run jupyter lab                   # 開啟 notebooks
 uv run pytest                        # 執行測試
 ```
 
+介面怎麼用（每個欄位的意思、怎麼看結果、怎麼存方案）：請見 [使用說明 docs/usage.md](docs/usage.md)。
+
 ## 結構
 
 ```
@@ -22,7 +24,7 @@ src/assetsim/     模擬引擎與共用程式
   plotting.py     matplotlib 中文字型設定
   plans.py        把設定存成具名方案（plan，JSON），可再載入，也可指定預設方案
 tests/            驗證數學與模擬的正確性
-docs/             開發文件（例如 data-migration.md：資料格式改版時怎麼安全遷移）
+docs/             文件：usage.md（使用說明）、data-migration.md（資料格式改版時怎麼安全遷移）
 data/             下載的價格資料、存下的方案（不進 git；可用 ASSETSIM_DATA_DIR 改位置）
 app.py            Streamlit 介面
 ```
