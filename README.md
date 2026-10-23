@@ -19,7 +19,7 @@ uv run pytest                        # 執行測試
 ```
 notebooks/        每個階段的學習筆記與練習題
 src/assetsim/     模擬引擎與共用程式
-  cashflow.py     逐月現金流模擬（Params, simulate）
+  cashflow.py     逐月現金流模擬（Params, Asset, simulate）：開銷、年終、緊急預備金、股息、費用與稅
   formulas.py     複利與年金的封閉解，用來驗證模擬
   plotting.py     matplotlib 中文字型設定
   plans.py        把設定存成具名方案（plan，JSON），可再載入，也可指定預設方案
