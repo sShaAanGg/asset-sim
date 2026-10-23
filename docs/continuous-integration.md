@@ -1,6 +1,6 @@
-# Contributing（貢獻指南）
+# Continuous Integration（持續整合）
 
-How changes get into `main`, and the policy for the CI gate（CI 關卡）that guards it.
+The CI gate（CI 關卡）that guards `main`: how changes get in, what the gate enforces, what CI runs, and the policy around it.
 
 ## How changes get into `main`
 
@@ -25,7 +25,7 @@ The `pytest` ruleset（規則集）on the default branch (Settings → Rules →
 
 ## What CI runs
 
-The workflow is [`.github/workflows/ci.yml`](.github/workflows/ci.yml): one job, `test`, on Ubuntu with Python 3.12 (from `.python-version`).
+The workflow is [`.github/workflows/ci.yml`](../.github/workflows/ci.yml): one job, `test`, on Ubuntu with Python 3.12 (from `.python-version`).
 
 1. `uv sync --locked --no-group ml`: installs the exact versions in `uv.lock`, without the `ml` group (PyTorch + CUDA, several GB, which no test needs).
 2. `uv run --no-sync pytest`: runs every test in `tests/`.
