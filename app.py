@@ -3,7 +3,7 @@
 import streamlit as st
 
 from assetsim.cashflow import Params, simulate
-from assetsim.scenarios import list_scenarios, load_params, save_params
+from assetsim.plans import get_default_plan, list_plans, load_plan, save_plan, set_default_plan
 
 st.set_page_config(page_title="資產模擬器", layout="wide")
 st.title("資產模擬器 — 第 0 階段：固定報酬率")
@@ -22,18 +22,48 @@ def to_widgets(p: Params) -> dict:
     }
 
 
-def load_scenario() -> None:
-    # 在 callback 裡改 session_state，才會在 widget 建立前生效
-    name = st.session_state.scenario_choice
+def apply_plan(name: str) -> bool:
+    """把方案的值放進 session_state；失敗時留下錯誤訊息並回傳 False。"""
     try:
-        st.session_state.update(to_widgets(load_params(name)))
-        st.session_state.scenario_msg = ("success", f"已載入「{name}」")
-    except (ValueError, KeyError, TypeError) as e:
-        st.session_state.scenario_msg = ("error", f"無法載入「{name}」：{e}")
+        st.session_state.update(to_widgets(load_plan(name)))
+        return True
+    except FileNotFoundError:
+        st.session_state.plan_msg = ("error", f"找不到方案「{name}」")
+        return False
+    except (OSError, ValueError, KeyError, TypeError) as e:
+        st.session_state.plan_msg = ("error", f"無法載入「{name}」：{e}")
+        return False
 
 
-for k, v in to_widgets(Params()).items():
-    st.session_state.setdefault(k, v)
+def load_selected() -> None:
+    # 在 callback 裡改 session_state，才會在 widget 建立前生效
+    name = st.session_state.plan_choice
+    if apply_plan(name):
+        st.session_state.plan_msg = ("success", f"已載入「{name}」")
+
+
+def toggle_default() -> None:
+    name = st.session_state.plan_choice
+    if get_default_plan() == name:
+        set_default_plan(None)
+        st.session_state.plan_msg = ("success", f"已取消預設方案「{name}」")
+    else:
+        set_default_plan(name)
+        st.session_state.plan_msg = ("success", f"已把「{name}」設為預設方案")
+
+
+# 每個瀏覽器 session 開始時：有預設方案就載入，否則（或載入失敗）用 Params() 的預設值
+if "started" not in st.session_state:
+    st.session_state.started = True
+    st.session_state.update(to_widgets(Params()))
+    try:
+        default = get_default_plan()
+    except (OSError, ValueError) as e:
+        default = None
+        st.session_state.plan_msg = ("error", f"無法讀取設定檔：{e}")
+    if default and apply_plan(default):
+        st.session_state.plan_choice = default
+        st.session_state.plan_msg = ("info", f"已載入預設方案「{default}」")
 
 with st.sidebar:
     st.header("收入與投入")
@@ -70,21 +100,31 @@ p = Params(
 )
 
 with st.sidebar:
-    st.header("情境")
-    saved = list_scenarios()
+    st.header("方案")
+    saved = list_plans()
+    try:
+        default = get_default_plan()
+    except (OSError, ValueError):
+        default = None
     if saved:
-        st.selectbox("已存的情境", saved, key="scenario_choice")
-        st.button("載入", on_click=load_scenario)
-    name = st.text_input("情境名稱", placeholder="例如：保守、積極")
+        if st.session_state.get("plan_choice") not in saved:
+            st.session_state.plan_choice = default if default in saved else saved[0]
+        st.selectbox("已存的方案", saved, key="plan_choice",
+                     format_func=lambda n: f"★ {n}" if n == default else n)
+        c1, c2 = st.columns(2)
+        c1.button("載入", on_click=load_selected, width="stretch")
+        c2.button("取消預設" if st.session_state.plan_choice == default else "設為預設",
+                  on_click=toggle_default, width="stretch")
+    name = st.text_input("方案名稱", placeholder="例如：保守、積極")
     if st.button("儲存目前設定", disabled=not name.strip()):
         try:
-            save_params(p, name)
-            st.session_state.scenario_msg = ("success", f"已儲存「{name.strip()}」"
-                                             + ("（覆蓋舊檔）" if name.strip() in saved else ""))
+            save_plan(p, name)
+            st.session_state.plan_msg = ("success", f"已儲存「{name.strip()}」"
+                                         + ("（覆蓋舊檔）" if name.strip() in saved else ""))
             st.rerun()
         except ValueError as e:
             st.error(str(e))
-    if msg := st.session_state.pop("scenario_msg", None):
+    if msg := st.session_state.pop("plan_msg", None):
         getattr(st, msg[0])(msg[1])
 
 df = simulate(p)
