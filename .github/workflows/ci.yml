@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.3.2  # 這個 action 沒有 v10 這種主版本 tag，要寫完整版本
         with:
           enable-cache: true
       # 不裝 ml 群組：PyTorch + CUDA 有好幾 GB，測試用不到
