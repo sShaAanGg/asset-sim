@@ -1,4 +1,4 @@
-"""matplotlib 中文字型設定：WSL 裡沒有中文字型，直接借用 Windows 的字型。"""
+"""matplotlib 中文字型設定: WSL 裡沒有中文字型, 直接借用 Windows 的字型."""
 
 from pathlib import Path
 
@@ -12,7 +12,7 @@ CANDIDATES = [
 
 
 def setup_cjk_font() -> str | None:
-    """註冊第一個找得到的中文字型並設為預設，回傳字型名稱（找不到則回傳 None）。"""
+    """註冊第一個找得到的中文字型並設為預設, 回傳字型名稱 (找不到則回傳 None)."""
     for path in CANDIDATES:
         if path.exists():
             font_manager.fontManager.addfont(str(path))
