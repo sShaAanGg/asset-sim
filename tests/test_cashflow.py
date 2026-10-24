@@ -143,7 +143,7 @@ def test_dividend_tax_and_cash_payout():
     df = simulate(p)
     assert df["dividends"].iloc[-1] == pytest.approx(5_000)
     assert df["taxes"].iloc[-1] == pytest.approx(500)
-    # 不再投入：稅後股息 4,500 依配置比例買進（A 佔 100%）
+    # 不再投入：稅後股息 4,500 依配置比例買進 (A 佔 100%)
     assert df["A"].iloc[-1] == pytest.approx(104_500)
 
 

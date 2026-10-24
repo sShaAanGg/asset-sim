@@ -20,7 +20,7 @@ def pct(x: float) -> float:
 
 
 def to_widgets(p: Params) -> dict:
-    """Params → 各個 widget 的值（百分比用 % 表示）。"""
+    """Params → 各個 widget 的值 (百分比用 % 表示)。"""
     etf, stock, cash = p.assets["ETF"], p.assets["股票"], p.assets[CASH]
     w = {
         "initial": float(p.initial_assets), "salary": float(p.monthly_salary),
@@ -92,7 +92,7 @@ def toggle_default() -> None:
         st.session_state.plan_msg = ("success", f"已把「{name}」設為預設方案")
 
 
-# 每個瀏覽器 session 開始時：有預設方案就載入，否則（或載入失敗）用 Params() 的預設值
+# 每個瀏覽器 session 開始時：有預設方案就載入，否則 (或載入失敗) 用 Params() 的預設值
 if "started" not in st.session_state:
     st.session_state.started = True
     st.session_state.update(to_widgets(Params()))
@@ -111,12 +111,12 @@ with st.sidebar:
     st.number_input("起始資產 (TWD)", max_value=1e9, step=100_000.0, key="initial", **money)
     st.number_input("月薪 (TWD)", max_value=1e7, step=5_000.0, key="salary", **money)
     st.slider("每年加薪 %", 0.0, 50.0, step=0.5, key="raise_pct")
-    st.number_input("年終獎金（月）", 0.0, 24.0, step=0.5, key="bonus_months")
+    st.number_input("年終獎金 (月)", 0.0, 24.0, step=0.5, key="bonus_months")
 
     st.header("開銷")
     st.number_input("每月生活開銷 (TWD)", max_value=1e7, step=1_000.0, key="expenses", **money)
-    st.slider("通膨 %（開銷每年調整）", 0.0, 10.0, step=0.25, key="inflation_pct")
-    st.number_input("緊急預備金（幾個月開銷）", 0.0, 60.0, step=1.0, key="emergency_months")
+    st.slider("通膨 % (開銷每年調整)", 0.0, 10.0, step=0.25, key="inflation_pct")
+    st.number_input("緊急預備金 (幾個月開銷)", 0.0, 60.0, step=1.0, key="emergency_months")
     st.number_input("緊急預備金年利率 %", 0.0, 10.0, step=0.1, key="emergency_pct")
 
     st.header("配置比例")
@@ -138,21 +138,21 @@ with st.sidebar:
             st.number_input("股息殖利率 %", 0.0, 20.0, step=0.25, key=f"{n}_dy")
             st.selectbox("每年配息次數", PAYOUTS, key=f"{n}_k")
             st.number_input("內扣費用 %", 0.0, 5.0, step=0.05, key=f"{n}_er")
-            st.checkbox("股息再投入（否則併入當月可投入的現金）", key=f"{n}_reinvest")
+            st.checkbox("股息再投入 (否則併入當月可投入的現金)", key=f"{n}_reinvest")
     with st.expander(CASH):
         st.number_input("年利率 %", 0.0, 10.0, step=0.1, key="cash_rate_pct")
 
     st.header("費用與稅")
-    st.slider("手續費折扣（1 = 不打折）", 0.0, 1.0, step=0.05, key="fee_discount")
-    st.checkbox("計入證交稅（ETF 0.1%、股票 0.3%）", key="sell_tax_on")
-    st.checkbox("計入二代健保補充保費（單次股息 ≥ 20,000 收 2.11%）", key="nhi_on")
+    st.slider("手續費折扣 (1 = 不打折)", 0.0, 1.0, step=0.05, key="fee_discount")
+    st.checkbox("計入證交稅 (ETF 0.1%、股票 0.3%)", key="sell_tax_on")
+    st.checkbox("計入二代健保補充保費 (單次股息 ≥ 20,000 收 2.11%)", key="nhi_on")
     st.number_input("股利所得有效稅率 %", 0.0, 40.0, step=1.0, key="div_tax_pct")
 
 p = from_widgets(st.session_state)
 
 with st.sidebar:
     for n in SECURITIES:
-        st.caption(f"{n} 總報酬（股息再投入、不計稅費）：{effective_return(p.assets[n]):.2%}")
+        st.caption(f"{n} 總報酬 (股息再投入、不計稅費)：{effective_return(p.assets[n]):.2%}")
 
     st.header("方案")
     saved = list_plans()
@@ -174,7 +174,7 @@ with st.sidebar:
         try:
             save_plan(p, name)
             st.session_state.plan_msg = ("success", f"已儲存「{name.strip()}」"
-                                         + ("（覆蓋舊檔）" if name.strip() in saved else ""))
+                                         + ("(覆蓋舊檔)" if name.strip() in saved else ""))
             st.rerun()
         except ValueError as e:
             st.error(str(e))
@@ -190,7 +190,7 @@ last = df.iloc[-1]
 first_year = df.loc[1:12]
 
 c1, c2, c3, c4 = st.columns(4)
-c1.metric(f"{p.years} 年後總資產（市值）", f"{last['total']:,.0f}")
+c1.metric(f"{p.years} 年後總資產 (市值)", f"{last['total']:,.0f}")
 c2.metric("全部賣出後淨值", f"{last['liquidation']:,.0f}")
 c3.metric("累計投入本金", f"{last['invested']:,.0f}")
 c4.metric("投資收益", f"{last['gain']:,.0f}",
@@ -199,9 +199,9 @@ c4.metric("投資收益", f"{last['gain']:,.0f}",
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("第一年儲蓄率", f"{first_year['surplus'].sum() / first_year['income'].sum():.0%}"
           if first_year["income"].sum() > 0 else "—")
-c2.metric("累計股息（稅前）", f"{last['dividends']:,.0f}")
+c2.metric("累計股息 (稅前)", f"{last['dividends']:,.0f}")
 c3.metric("累計手續費", f"{last['fees']:,.0f}")
-c4.metric("累計稅（補充保費、股利稅、證交稅）", f"{last['taxes']:,.0f}")
+c4.metric("累計稅 (補充保費、股利稅、證交稅)", f"{last['taxes']:,.0f}")
 
 if last["shortfall"] > 0:
     first = df.loc[df["shortfall"] > 0, "year"].iloc[0]
