@@ -54,7 +54,7 @@ Expand ETF or 股票 to set:
 | 內扣費用 % | Expense ratio (內扣費用), deducted from the value monthly. |
 | 股息再投入 | Reinvest dividends (股息再投入) into the same asset. When off, dividends join that month's cash and are split by the target weights. |
 
-Under 現金 you set its annual interest rate. Below the asset settings, 「總報酬」 shows each asset's equivalent total return (總報酬), i.e. price return plus reinvested dividends minus the expense ratio, ignoring fees and taxes. That's the number to compare with an ETF's published total return.
+Under 現金 you set its annual interest rate. Below the asset settings, "總報酬" shows each asset's equivalent total return (總報酬), i.e. price return plus reinvested dividends minus the expense ratio, ignoring fees and taxes. That's the number to compare with an ETF's published total return.
 
 ### 費用與稅 (fees and taxes)
 
@@ -88,26 +88,26 @@ Returns are fixed and deterministic (固定報酬率) in this stage: there is no
 | 投資收益 | Investment gain (投資收益) = total market value − principal. The percentage below it is the gain divided by principal, a total return over the whole period, **not** an annualized one. |
 | 第一年儲蓄率 | First-year savings rate (儲蓄率): surplus ÷ income over the first 12 months. |
 | 累計股息 / 手續費 / 稅 | Cumulative dividends (before tax), broker fees, and taxes (NHI premium, dividend tax, sell tax). |
-| Red error 「資產在第 N 年用完」 | Assets ran out in year N; it also shows the total of expenses that couldn't be paid after that. |
+| Red error "資產在第 N 年用完" | Assets ran out in year N; it also shows the total of expenses that couldn't be paid after that. |
 | 總資產 vs 投入本金 | Line chart of total assets and principal at the end of each year. The gap between the lines is the gain. |
 | 各資產價值 | Stacked area chart of each asset and the emergency fund at the end of each year. |
 | 逐年明細 | Expandable year-by-year table: salary, income, expenses, surplus, each asset, the emergency fund, totals, and cumulative dividends, fees and taxes. |
 
 ## Plans (方案)
 
-A plan is a named, saved set of all the inputs above, for example 「保守」 (conservative) and 「積極」 (aggressive), so you can switch between them.
+A plan is a named, saved set of all the inputs above, for example "保守" (conservative) and "積極" (aggressive), so you can switch between them.
 
-The 「方案」 section is at the bottom of the sidebar.
+The "方案" section is at the bottom of the sidebar.
 
 | Action | How |
 |---|---|
-| Save (儲存) | Type a name in 「方案名稱」 and click 「儲存目前設定」. Saving with an existing name **overwrites** that plan (the message says 「覆蓋舊檔」). |
-| Load (載入) | Pick a plan in 「已存的方案」 and click 「載入」. This list only appears once at least one plan is saved. |
-| Set default (設為預設) | Pick a plan and click 「設為預設」. It's marked with ★, and every new browser session (a new tab or a restart) starts from it. Click 「取消預設」 to go back to the built-in defaults. |
+| Save (儲存) | Type a name in "方案名稱" and click "儲存目前設定". Saving with an existing name **overwrites** that plan (the message says "覆蓋舊檔"). |
+| Load (載入) | Pick a plan in "已存的方案" and click "載入". This list only appears once at least one plan is saved. |
+| Set default (設為預設) | Pick a plan and click "設為預設". It's marked with ★, and every new browser session (a new tab or a restart) starts from it. Click "取消預設" to go back to the built-in defaults. |
 
 Notes:
 
-- Changing an input does **not** change the saved plan. Click 「儲存目前設定」 again to update it.
+- Changing an input does **not** change the saved plan. Click "儲存目前設定" again to update it.
 - Refreshing the page or opening a new tab starts a new session (工作階段): inputs go back to the default plan, or to the built-in values if no default is set. Unsaved changes are lost, so save first.
 - Plans saved by an older version of the app are upgraded when loaded. New settings get values that keep the old results unchanged (e.g. no bonus, no fees, no dividends), so check them after loading. The file on disk stays in the old format until you save the plan again.
 - Plan names can't contain `/ \ : * ? " < > |` or start with a dot.
@@ -135,7 +135,7 @@ Plans then live in `~/.local/share/asset-sim/plans/`. For how the file format is
 | Problem | Fix |
 |---|---|
 | The page doesn't open | Check that the terminal shows `Local URL: http://localhost:8501`. If port 8501 is busy, Streamlit picks another port, so use the URL it prints. |
-| 「ETF + 股票 = …%，不能超過 100%」 | Lower ETF % or 股票 % until they add up to 100% or less. |
-| 「無法載入…」 / 「找不到方案…」 when loading | The plan file is missing or invalid. Check `data/plans/`, or restore it from your backup. |
-| 「無法讀取設定檔」 at startup | `data/settings.json` is invalid. Delete it (you only lose which plan is the default) and set the default again. |
+| "ETF + 股票 = ...%, 不能超過 100%" | Lower ETF % or 股票 % until they add up to 100% or less. |
+| "無法載入..." / "找不到方案..." when loading | The plan file is missing or invalid. Check `data/plans/`, or restore it from your backup. |
+| "無法讀取設定檔" at startup | `data/settings.json` is invalid. Delete it (you only lose which plan is the default) and set the default again. |
 | A loaded plan raises a Streamlit error about a value out of range | The file holds a value outside a slider's range (only possible if it was edited by hand). Fix the value in the JSON file. |

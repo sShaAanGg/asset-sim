@@ -94,7 +94,7 @@ FIXTURES = Path(__file__).parent / "fixtures"  # 方案檔在 fixtures/plans/
 
 
 def test_v1_file_migrates_to_identical_results():
-    """v1 檔案 (用 v1 程式存的) 升級後，模擬結果要和 v1 程式算的完全一樣。"""
+    """v1 檔案 (用 v1 程式存的) 升級後, 模擬結果要和 v1 程式算的完全一樣."""
     p = load_plan("v1_example", FIXTURES)
     assert p.monthly_expenses == pytest.approx(55_000 * 0.65)
     assert p.assets["ETF"] == Asset(0.7, price_return=0.07)
