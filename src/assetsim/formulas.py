@@ -4,7 +4,7 @@
 推導見 notebooks/00_compound_interest.ipynb.
 """
 
-
+# 複利計算公式 (compound interest formula)
 def fv_lump_sum(principal: float, i: float, n: int) -> float:
     """單筆投入 (lump sum) n 期後的終值 (future value): P(1+i)^n."""
     return principal * (1 + i) ** n
