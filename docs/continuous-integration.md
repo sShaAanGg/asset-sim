@@ -1,19 +1,19 @@
-# Continuous Integration（持續整合）
+# Continuous Integration (持續整合)
 
-The CI gate（CI 關卡）that guards `main`: how changes get in, what the gate enforces, what CI runs, and the policy around it.
+The CI gate (CI 關卡) that guards `main`: how changes get in, what the gate enforces, what CI runs, and the policy around it.
 
 ## How changes get into `main`
 
 1. Create a branch from the latest `main`.
 2. Commit, and run the tests locally (see [Running CI locally](#running-ci-locally)).
-3. Push and open a pull request（PR）. Open it as a draft（草稿） while the work is in progress, if you like; CI runs on drafts too.
+3. Push and open a pull request (PR). Open it as a draft (草稿) while the work is in progress, if you like; CI runs on drafts too.
 4. Merge once the `test` check is green and the branch is up to date with `main`.
 
 Nobody pushes straight to `main`, including the repo owner.
 
 ## What the gate enforces
 
-The `pytest` ruleset（規則集）on the default branch (Settings → Rules → Rulesets):
+The `pytest` ruleset (規則集) on the default branch (Settings → Rules → Rulesets):
 
 | Rule | Setting | What it means |
 |---|---|---|
@@ -52,7 +52,7 @@ uv sync --locked --no-group ml && uv run --no-sync pytest
 
 During day-to-day work, `uv run pytest` is enough. Note that it reinstalls the `ml` group because of `default-groups`.
 
-## Policy（政策）
+## Policy (政策)
 
 1. **A red check is never merged.** Fix the code or the test. Don't weaken, skip or delete a test just to get the check green; if a test is genuinely wrong, say why in the PR.
 2. **New behaviour comes with tests.** Bug fixes come with a test that would have caught the bug.

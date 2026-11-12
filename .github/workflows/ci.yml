@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.2  # 這個 action 沒有 v10 這種主版本 tag，要寫完整版本
+      - uses: astral-sh/setup-uv@v10.3.2  # 這個 action 沒有 v10 這種主版本 tag, 要寫完整版本
         with:
           enable-cache: true
-      # 不裝 ml 群組：PyTorch + CUDA 有好幾 GB，測試用不到
+      # 不裝 ml 群組: PyTorch + CUDA 有好幾 GB, 測試用不到
       - name: Install dependencies (without the ml group)
         run: uv sync --locked --no-group ml
-      # --no-sync：不然 uv run 會照 default-groups 再把 ml 群組裝回來
+      # --no-sync: 不然 uv run 會照 default-groups 再把 ml 群組裝回來
       - name: Run tests
         run: uv run --no-sync pytest
