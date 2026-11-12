@@ -11,6 +11,13 @@ The format of local data (plans（方案）, and later real balance history and 
 
 The code is in `src/assetsim/plans.py`: `SCHEMA_VERSION` is the current plan format version, and `_migrate()` upgrades older plan files. The settings file is versioned separately, so the two formats can change independently.
 
+### Version history（版本紀錄）
+
+| Version | Change | Migration |
+|---|---|---|
+| 1 | `savings_rate`, `allocation`, `annual_returns` | — |
+| 2 | Per-asset `Asset` (dividends, expense ratio, fees, sell tax); `monthly_expenses` + `inflation`, `bonus_months`, emergency fund, NHI supplement, dividend tax | `_v1_to_v2`: sets `monthly_expenses = salary × (1 − savings_rate)` and `inflation = annual_raise`, everything new to 0, so results are identical to v1. Tested against `tests/fixtures/plans/v1_example.json`. |
+
 ## Safety rules（安全原則）
 
 1. **Back up first, then migrate（先備份，再遷移）.** Copy the whole folder, e.g. `cp -a data/ data.bak-$(date +%Y%m%d)/`. Never run a migration without a backup.
@@ -23,25 +30,30 @@ The code is in `src/assetsim/plans.py`: `SCHEMA_VERSION` is the current plan for
 
 ## Steps for a format change（改版步驟，JSON 方案）
 
-Example: adding an `inflation` field to `Params`.
+The real v1 → v2 step is `_v1_to_v2` in `src/assetsim/plans.py`, tested in `tests/test_plans.py`. The next change follows the same pattern. Example: a future v3 that adds a `withdrawal_rate` field to `Params` for the retirement phase.
 
 1. Add the field to `Params` with a default value.
-2. Change `SCHEMA_VERSION` to `2`.
-3. Add a step to `_migrate`:
+2. Change `SCHEMA_VERSION` to `3`.
+3. Add a step to `_migrate`, after the existing v1 → v2 step:
 
    ```python
    def _migrate(data: dict) -> dict:
        version = data.get("version")
        if version == 1:
-           data = {"version": 2, "params": {**data["params"], "inflation": 0.02}}
+           data = {"version": 2, "params": _v1_to_v2(data["params"])}
            version = 2
+       if version == 2:
+           data = {"version": 3, "params": {**data["params"], "withdrawal_rate": 0.0}}
+           version = 3
        if version != SCHEMA_VERSION:
            raise ValueError(f"不支援的方案檔版本：{version}（目前是 {SCHEMA_VERSION}）")
        return data
    ```
 
-4. Put a v1 file in `tests/fixtures/` and write a test checking that it loads with `inflation == 0.02`.
-5. Decide between **lazy migration** and **migrating everything at once** (see the next section).
+   Pick defaults for new fields that keep old plans' results unchanged (here, no withdrawals), as `_v1_to_v2` does.
+4. Put a v2 file in `tests/fixtures/plans/` next to `v1_example.json`, and write tests that both load and give the expected results.
+5. Add a row to the version history table above.
+6. Decide between **lazy migration** and **migrating everything at once** (see the next section).
 
 ### Lazy vs eager migration（延遲遷移 vs 一次全部遷移）
 

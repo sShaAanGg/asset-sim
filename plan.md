@@ -40,7 +40,7 @@
   - [ ] 練習題 1：72 法則的誤差曲線
   - [ ] 練習題 2：達成 1,000 萬要幾年（用對數解 $n$）
   - [ ] 練習題 3：推導成長年金（growing annuity）公式
-  - [ ] 練習題 4：在 `Params` 加入通膨（inflation），輸出實質購買力（real purchasing power）（含測試）
+  - [ ] 練習題 4：用 `Params.inflation` 輸出實質購買力（real purchasing power）欄位 `real_total`（含測試）
   - [ ] 練習題 5：比較再平衡（rebalancing）開 / 關
 
 ### 第 1 階段：蒙地卡羅模擬（Monte Carlo simulation）
@@ -118,8 +118,12 @@
 
 ## 模型待補（不屬於特定階段）
 
-- [ ] 稅、手續費、ETF 內扣費用（expense ratio）
-- [ ] 生活支出、緊急預備金（emergency fund）
+- [x] 手續費、證交稅、ETF 內扣費用（expense ratio）
+- [x] 股息（dividend yield、配息頻率、再投入）、二代健保補充保費、股利所得有效稅率
+- [x] 生活開銷（隨通膨調整）、年終獎金、緊急預備金（emergency fund）
+- [ ] 股利所得稅完整計算：依綜所稅級距比較合併計稅（8.5% 抵減）與分開計稅（28%）
+- [ ] 海外 ETF（複委託）：股息預扣 30% 美國稅、匯率、複委託手續費
+- [ ] 一次性大額支出（買房、買車）、收入中斷（轉職、育兒）
 - [ ] 退休後的提領階段（decumulation）：4% 法則（4% rule）、報酬順序風險（sequence-of-returns risk）
 
 ## 學習資源
