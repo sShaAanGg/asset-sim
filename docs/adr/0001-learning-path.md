@@ -32,6 +32,8 @@ Under B, every feature and bug fix follows this gate:
 4. The AI implements the change and its tests.
 5. Claude quizzes me on the implementation. If I can't follow it, I go back to the notebook. I need to pass before I review the change and decide whether it can be merged.
 
+To pass a quiz, I need 80% of the answers right and every key question right. Claude marks the key questions, the ones I must understand, when it sets the quiz. For each wrong answer, I either learn the missing math in the notebook or discuss it with Claude, until Claude judges that I understand it.
+
 ## Consequences (影響)
 
 - The math stays shallower than plan.md intends. Phases 4–6 (regression, HMM, deep learning) carry the most risk: data leakage (資料洩漏) and look-ahead bias (前視偏差) produce code that runs and backtests well but is wrong, so those phases need more math and methodology up front.

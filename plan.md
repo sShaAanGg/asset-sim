@@ -6,7 +6,7 @@
 
 1. **先寫 spec, 再讓 AI 實作** (見 [ADR 0001](docs/adr/0001-learning-path.md)): 每個功能 (含修 bug) 先在 `specs/` 寫好介面與性質 (property). 寫不出 spec, 或看不懂實作, 就在該階段的 notebook 補需要的數學; 通過測驗 (quiz) 才算過關.
 2. **每個模型都要和簡單的基準 (baseline) 比較**, 例如 "直接用歷史平均": 贏不過基準, 就代表模型沒學到東西.
-3. **用兩種方法驗證**: 模擬 vs 封閉解 (closed-form solution), 手刻 vs 套件, 結果一致才算對, 並寫成測試.
+3. **用兩種方法驗證**: 例如模擬 vs 封閉解 (closed-form solution), 結果一致才算對, 並寫成測試.
 4. **金融資料雜訊很大 (low signal-to-noise ratio)**: 模型預測的結果不要直接拿來決定真錢怎麼投資.
 
 ## 總覽
