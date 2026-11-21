@@ -7,7 +7,7 @@ from assetsim.formulas import fv_annuity, fv_lump_sum
 
 
 def simple(assets: dict[str, Asset] | None = None, **kw) -> Params:
-    """不加薪、沒有年終、開銷固定、沒有緊急預備金，費用和股息都是 0：回到最基本的複利模型。"""
+    """不加薪, 沒有年終, 開銷固定, 沒有緊急預備金, 費用和股息都是 0: 回到最基本的複利模型."""
     defaults = dict(assets=assets or {"A": Asset(1.0, price_return=0.07)}, annual_raise=0.0,
                     bonus_months=0.0, inflation=0.0, emergency_months=0.0, rebalance=False)
     return Params(**(defaults | kw))
@@ -17,7 +17,7 @@ def final(p: Params, column: str = "total") -> float:
     return simulate(p)[column].iloc[-1]
 
 
-# --- 基本複利：和封閉解比較 ---
+# --- 基本複利: 和封閉解比較 ---
 
 def test_monthly_rate_compounds_to_annual():
     assert (1 + monthly_rate(0.07)) ** 12 == pytest.approx(1.07)
@@ -66,7 +66,7 @@ def test_bonus_paid_in_month_12_only():
 def test_emergency_fund_is_filled_before_investing():
     df = simulate(simple(initial_assets=0, monthly_salary=30_000, monthly_expenses=20_000,
                          emergency_months=3, emergency_rate=0.0, years=1))
-    # 目標 60,000：前 6 個月的結餘全部進緊急預備金
+    # 目標 60,000: 前 6 個月的結餘全部進緊急預備金
     assert df.loc[6, "emergency"] == pytest.approx(60_000)
     assert df.loc[6, "A"] == pytest.approx(0)
     assert df.loc[7, "emergency"] == pytest.approx(60_000)
@@ -77,12 +77,12 @@ def test_deficit_uses_emergency_fund_then_sells_assets():
     a = Asset(1.0, fee_rate=0.001, sell_tax=0.003)
     df = simulate(simple(assets={"A": a}, initial_assets=110_000, monthly_salary=0,
                          monthly_expenses=10_000, emergency_months=1, emergency_rate=0.0, years=1))
-    # 起始：緊急預備金 10,000，資產 100,000
+    # 起始: 緊急預備金 10,000, 資產 100,000
     assert df.loc[1, "emergency"] == pytest.approx(0)
     assert df.loc[1, "A"] == pytest.approx(100_000)
-    # 第 2 個月要賣出 10,000 / (1 - 0.004) 的市值，才能湊到 10,000
+    # 第 2 個月要賣出 10,000 / (1 - 0.004) 的市值, 才能湊到 10,000
     assert df.loc[2, "A"] == pytest.approx(100_000 - 10_000 / 0.996)
-    # 一年開銷 120,000，能動用的只有 10,000 + 100,000 × 0.996
+    # 一年開銷 120,000, 能動用的只有 10,000 + 100,000 × 0.996
     assert df["shortfall"].iloc[-1] == pytest.approx(120_000 - 10_000 - 99_600)
     assert df["total"].iloc[-1] == pytest.approx(0, abs=1e-6)
 
@@ -95,7 +95,7 @@ def test_shortfall_when_everything_is_sold():
     assert df["shortfall"].iloc[-1] == pytest.approx(115_000)
 
 
-# --- 費用、股息、稅 ---
+# --- 費用, 股息, 稅 ---
 
 def test_expense_ratio_drag():
     p = simple(assets={"A": Asset(1.0, price_return=0.07, expense_ratio=0.005)},
@@ -143,7 +143,7 @@ def test_dividend_tax_and_cash_payout():
     df = simulate(p)
     assert df["dividends"].iloc[-1] == pytest.approx(5_000)
     assert df["taxes"].iloc[-1] == pytest.approx(500)
-    # 不再投入：稅後股息 4,500 依配置比例買進（A 佔 100%）
+    # 不再投入: 稅後股息 4,500 依配置比例買進 (A 佔 100%)
     assert df["A"].iloc[-1] == pytest.approx(104_500)
 
 

@@ -94,12 +94,12 @@ FIXTURES = Path(__file__).parent / "fixtures"  # 方案檔在 fixtures/plans/
 
 
 def test_v1_file_migrates_to_identical_results():
-    """v1 檔案（用 v1 程式存的）升級後，模擬結果要和 v1 程式算的完全一樣。"""
+    """v1 檔案 (用 v1 程式存的) 升級後, 模擬結果要和 v1 程式算的完全一樣."""
     p = load_plan("v1_example", FIXTURES)
     assert p.monthly_expenses == pytest.approx(55_000 * 0.65)
     assert p.assets["ETF"] == Asset(0.7, price_return=0.07)
     df = simulate(p)
-    # 以下數字是 v1 程式（commit 3e41ae3）的輸出
+    # 以下數字是 v1 程式 (commit 3e41ae3) 的輸出
     expected = {1: (521991.16012292285, 519250.0), 12: (772106.2893109211, 731000.0),
                 13: (796070.4732527551, 750731.25), 120: (4567978.198400693, 3087981.188374346),
                 300: (21004066.01780411, 8390443.468496734)}
