@@ -4,6 +4,8 @@ asset-sim is a personal asset growth simulator and a project for learning ML and
 
 Before changing anything, read the docs in [docs/](docs/): they hold the repo's conventions, and [docs/adr/](docs/adr/) holds the decisions behind them.
 
+The ADRs are the source of truth. The rules below summarize them; if a rule here disagrees with an ADR, follow the ADR and point out the mismatch so this file can be fixed.
+
 ## Rules
 
 1. **Record major decisions as an ADR** (Architecture Decision Record) in `docs/adr/`, numbered in order (`0002-<topic>.md`, ...), with a status of Proposed, Accepted or Superseded. Follow the format of [0001](docs/adr/0001-learning-path.md).
