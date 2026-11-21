@@ -17,7 +17,7 @@ The ADRs are the source of truth. The rules below summarize them; if a rule here
    - When the user says the spec is done, quiz them on it and the math behind it. Don't implement until they pass.
    - Then implement the change and its tests against the spec.
    - After implementing, quiz the user on the implementation before they review it.
-   - To pass either quiz, the user needs 80% of the answers right and every key question right. When you set a quiz, mark the key questions: the ones the user must understand. For each wrong answer, the user learns the missing math in the notebook or discusses it with you, until you judge they understand it.
+   - To pass either quiz, the user needs 80% of the answers right and every key question right. When you set a quiz, mark the key questions, the ones the user must understand: every property in the spec needs at least one. Give the reason each one is key, and let the user approve them before they start answering. For each wrong answer, the user learns the missing math in the notebook or discusses it with you, until you judge they understand it.
 
 ## Language and punctuation
 
