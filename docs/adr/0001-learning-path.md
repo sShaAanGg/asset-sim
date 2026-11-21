@@ -25,6 +25,8 @@ Proposed: take **B** first, then add **C**.
 Under B, every feature follows this gate:
 
 1. Before any implementation, I write down what "correct" means: expected properties or rough values.
+   - Claude reviews the properties.
+   - I check each one against an extreme setting where the answer is known (zero volatility, very large N, zero return), so it doesn't rest on anyone's judgment alone.
 2. If I can't write them, I learn the math needed first.
 3. The AI implements the feature and its tests.
 4. I review the change and decide whether it can be merged.
