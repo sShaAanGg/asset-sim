@@ -17,7 +17,7 @@ uv run pytest                        # 執行測試
 ## 結構
 
 ```
-notebooks/        每個階段的學習筆記與練習題
+notebooks/        每個階段補數學用的筆記: 學到能寫出 spec, 也看得懂實作
 src/assetsim/     模擬引擎與共用程式
   cashflow.py     逐月現金流模擬 (Params, Asset, simulate): 開銷, 年終, 緊急預備金, 股息, 費用與稅
   formulas.py     複利與年金的封閉解, 用來驗證模擬

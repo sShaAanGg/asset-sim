@@ -14,7 +14,9 @@ The ADRs are the source of truth. The rules below summarize them; if a rule here
    - You may create a new spec file with the headings, a one-line summary and a draft Goal. Everything below Goal is the user's.
    - If the spec is missing or empty, ask for it before you start.
    - You may review the spec and ask questions that expose gaps, but don't fill the gaps yourself.
+   - When the user says the spec is done, quiz them on it and the math behind it. Don't implement until they pass.
    - Then implement the change and its tests against the spec.
+   - After implementing, quiz the user on the implementation before they review it. The user sets the pass mark for both quizzes.
 
 ## Language and punctuation
 
