@@ -25,7 +25,8 @@ Proposed: take **B** first, then add **C**.
 Under B, every feature and bug fix follows this gate:
 
 1. Before any implementation, I write down what "correct" means, in a spec at `specs/<feature>.md`: the interface, and the expected properties or rough values.
-   - Claude reviews the whole spec.
+   - Claude reviews the whole spec. It records the questions I haven't answered under `### Raised by agents` in the spec's Open questions, as questions only, without answers, so they survive a change of session.
+   - Before the quiz, that section is empty, or I mark each remaining question as deferred (延後) and Claude judges it isn't critical: no property depends on it.
    - I check each property against an extreme setting where the answer is known (zero volatility, very large N, zero return), so it doesn't rest on anyone's judgment alone.
 2. If I can't write the spec, I learn the math needed first, in the phase's notebook (`notebooks/`).
 3. Claude quizzes me on the spec and the math behind it (tutor mode). I need to pass before implementation starts.

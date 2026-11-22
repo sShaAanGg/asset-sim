@@ -13,7 +13,8 @@ The ADRs are the source of truth. The rules below summarize them; if a rule here
 3. **The user writes the spec before you implement** (see [ADR 0001](docs/adr/0001-learning-path.md)). Before implementing a feature or fixing a bug, the user writes down what "correct" means in `specs/<feature>.md`, one file per feature, with the headings of [specs/monte-carlo.md](specs/monte-carlo.md). The spec's interface and properties (expected behavior or rough values) are the user's to write, not yours.
    - You may create a new spec file with the headings, a one-line summary and a draft Goal. Everything below Goal is the user's.
    - If the spec is missing or empty, ask for it before you start.
-   - You may review the spec and ask questions that expose gaps, but don't fill the gaps yourself.
+   - You may review the spec and ask questions that expose gaps, but don't fill the gaps yourself. Record your unanswered questions under `### Raised by agents` in the spec's Open questions, as questions only, without answers, so they survive a change of session.
+   - Before the quiz, that section must be empty, or each remaining question must be marked deferred by the user and judged by you not to be critical: no property depends on it.
    - When the user says the spec is done, quiz them on it and the math behind it. Don't implement until they pass.
    - Then implement the change and its tests against the spec.
    - After implementing, quiz the user on the implementation before they review it.
