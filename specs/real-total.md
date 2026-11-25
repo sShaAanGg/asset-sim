@@ -13,12 +13,12 @@ Add a `real_total` column to `simulate()`'s output: total assets in today's purc
 2. Update the real_total at the same timing as expenses raising
 
 ## Properties (性質)
-1. When t <= 0, real_total == total
-2. If Params.inflation == 0, real_total == total
-3. If inflation != 0, real_total = total / (1+inflation) ** t
-  - t = (month - 1) // 12, month starting from 0
+1. If inflation != 0, real_total = total / (1+inflation) ** t
+  - t = max((month - 1) // 12, 0), month starting from 0
   - In sync with the timing of expenses raising
-4. Every row's expenses / (1+inflation) ** t should be equal to the original monthly_expenses
+2. If Params.inflation == 0, real_total == total
+3. When t == 0, real_total == total
+4. Every row's expenses / (1+inflation) ** t should be equal to the original monthly_expenses, except the 0-th row
 
 ## Open questions (待釐清的問題)
 
