@@ -177,3 +177,54 @@ def test_from_dict_round_trip():
 def test_invalid_params_raise(bad):
     with pytest.raises(ValueError):
         simulate(Params(**bad))
+
+
+# --- 實質總資產 (real total), 對應 specs/real-total.md 的 P1-P4 ---
+
+INFLATIONS = [0.0, 0.02, 0.05]
+
+
+def price_index(month, inflation: float):
+    """spec 的定義: t = max((month - 1) // 12, 0), 物價指數 = (1 + inflation) ** t."""
+    return (1 + inflation) ** ((month - 1) // 12).clip(lower=0)
+
+
+@pytest.mark.parametrize("inflation", INFLATIONS)
+def test_real_total_follows_definition(inflation):
+    """P1: real_total = total / (1 + inflation) ** t."""
+    df = simulate(Params(inflation=inflation, years=5))
+    expected = df["total"] / price_index(df["month"], inflation)
+    assert df["real_total"].to_numpy() == pytest.approx(expected.to_numpy())
+
+
+def test_real_total_example_values():
+    """P1 代入數字: 第 12 個月 t = 0, 第 13 個月 t = 1, 第 25 個月 t = 2."""
+    df = simulate(Params(inflation=0.02, years=3)).set_index("month")
+    for month, t in [(0, 0), (12, 0), (13, 1), (25, 2)]:
+        assert df.loc[month, "real_total"] == pytest.approx(df.loc[month, "total"] / 1.02 ** t)
+    assert df.loc[13, "real_total"] < df.loc[13, "total"]  # 抓得到偷懶的 real_total = total
+
+
+def test_real_total_equals_total_without_inflation():
+    """P2: inflation == 0 時, 每個月 real_total == total."""
+    df = simulate(Params(inflation=0.0))
+    assert df["real_total"].to_numpy() == pytest.approx(df["total"].to_numpy())
+
+
+@pytest.mark.parametrize("inflation", INFLATIONS)
+def test_real_total_equals_total_in_first_year(inflation):
+    """P3: t == 0 (第 0-12 個月) 時, real_total == total."""
+    first_year = simulate(Params(inflation=inflation, years=2)).query("month <= 12")
+    assert first_year["real_total"].to_numpy() == pytest.approx(first_year["total"].to_numpy())
+
+
+@pytest.mark.parametrize("inflation", INFLATIONS)
+def test_real_expenses_stay_constant(inflation):
+    """P4: 開銷用同一個物價指數換算後, 每列 (第 0 列除外) 都等於起始的 monthly_expenses.
+
+    這條不重述 real_total 的公式, 而是檢查物價指數和 simulate() 調整開銷的時機一致.
+    """
+    p = Params(inflation=inflation, years=5)
+    df = simulate(p).query("month >= 1")
+    real_expenses = df["expenses"] / price_index(df["month"], inflation)
+    assert real_expenses.to_numpy() == pytest.approx(p.monthly_expenses)

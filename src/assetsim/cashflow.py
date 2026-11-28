@@ -27,7 +27,7 @@ STOCK_SELL_TAX = 0.003  # 個股證交稅
 # simulate() 輸出的欄位名稱, 資產不能用這些名字
 RESERVED_COLUMNS = {
     "month", "year", "salary", "income", "expenses", "surplus", "emergency", "total",
-    "liquidation", "invested", "gain", "dividends", "fees", "taxes", "shortfall",
+    "liquidation", "invested", "gain", "dividends", "fees", "taxes", "shortfall", "real_total",
 }
 
 
@@ -122,6 +122,7 @@ def simulate(p: Params) -> pd.DataFrame:
 
     total 是市值; liquidation 是全部賣出, 扣掉證交稅與手續費後拿到的錢.
     dividends, fees, taxes, shortfall 都是累計值; shortfall 是資產賣光後仍付不出的開銷.
+    real_total 是 total 換算成第 0 個月購買力的實質金額 (見 specs/real-total.md).
     """
     p.validate()
     assets = p.assets
@@ -222,4 +223,8 @@ def simulate(p: Params) -> pd.DataFrame:
     df = pd.DataFrame(rows)
     df["year"] = df["month"] / 12
     df["gain"] = df["total"] - df["invested"]
+    # 實質總資產 (real total): 換算成第 0 個月的購買力. 物價指數和開銷同步, 每年調一次:
+    # 第 1-12 個月是 1, 第 13-24 個月是 1+inflation, 以此類推 (見 specs/real-total.md)
+    years_of_inflation = ((df["month"] - 1) // 12).clip(lower=0)
+    df["real_total"] = df["total"] / (1 + p.inflation) ** years_of_inflation
     return df
