@@ -24,19 +24,23 @@ Proposed: take **B** first, then add **C**.
 
 Under B, every feature and bug fix follows this gate:
 
-1. Before any implementation, I write down what "correct" means: expected properties or rough values.
-   - Claude reviews the properties.
-   - I check each one against an extreme setting where the answer is known (zero volatility, very large N, zero return), so it doesn't rest on anyone's judgment alone.
-2. If I can't write them, I learn the math needed first.
-3. The AI implements the change and its tests.
-4. I review the change and decide whether it can be merged.
+1. Before any implementation, I write down what "correct" means, in a spec at `specs/<feature>.md`: the interface, and the expected properties or rough values.
+   - Claude reviews the whole spec. It records the questions I haven't answered under `### Raised by agents` in the spec's Open questions, as questions only, without answers, so they survive a change of session.
+   - Before the quiz, that section is empty, or I mark each remaining question as deferred (延後) and Claude judges it isn't critical: no property depends on it.
+   - I check each property against an extreme setting where the answer is known (zero volatility, very large N, zero return), so it doesn't rest on anyone's judgment alone.
+2. If I can't write the spec, I learn the math needed first, in the phase's notebook (`notebooks/`).
+3. Claude quizzes me on the spec and the math behind it (tutor mode). I need to pass before implementation starts.
+4. The AI implements the change and its tests.
+5. Claude quizzes me on the implementation. If I can't follow it, I go back to the notebook. I need to pass before I review the change and decide whether it can be merged.
+
+To pass a quiz, I need 80% of the answers right and every key question right. Key questions are the ones I must understand: every property in the spec has at least one, and Claude marks them when it sets the quiz, with the reason each one is key. I approve them before I start answering. For each wrong answer, I either learn the missing math in the notebook or discuss it with Claude, until Claude judges that I understand it.
 
 ## Consequences (影響)
 
 - The math stays shallower than plan.md intends. Phases 4–6 (regression, HMM, deep learning) carry the most risk: data leakage (資料洩漏) and look-ahead bias (前視偏差) produce code that runs and backtests well but is wrong, so those phases need more math and methodology up front.
 - C starts once phase 1 gives a workload heavy enough to optimize.
 - Neither B nor C covers concurrency (並行) beyond multiprocessing, because of the GIL.
-- If this is accepted, plan.md needs updating to match.
+- Notebooks change purpose: from deriving each topic in full to learning enough math to write the spec and follow the implementation. plan.md and README.md are updated to match while B is on trial.
 
 ## How this gets decided
 

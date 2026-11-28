@@ -17,13 +17,14 @@ uv run pytest                        # 執行測試
 ## 結構
 
 ```
-notebooks/        每個階段的學習筆記與練習題
+notebooks/        每個階段補數學用的筆記: 學到能寫出 spec, 也看得懂實作
 src/assetsim/     模擬引擎與共用程式
   cashflow.py     逐月現金流模擬 (Params, Asset, simulate): 開銷, 年終, 緊急預備金, 股息, 費用與稅
   formulas.py     複利與年金的封閉解, 用來驗證模擬
   plotting.py     matplotlib 中文字型設定
   plans.py        把設定存成具名方案 (plan, JSON), 可再載入, 也可指定預設方案
 tests/            驗證數學與模擬的正確性
+specs/            每個功能的規格 (spec): 介面與性質 (property), 實作前由我寫好
 docs/             文件: usage.md (使用說明), data-migration.md (資料格式改版時怎麼安全遷移),
                   continuous-integration.md (CI 關卡的規則)
 data/             下載的價格資料, 存下的方案 (不進 git; 可用 ASSETSIM_DATA_DIR 改位置)
