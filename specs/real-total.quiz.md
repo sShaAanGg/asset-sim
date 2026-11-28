@@ -1,5 +1,7 @@
 # Quiz: Real total assets (實質總資產) spec
 
+> **Skipped by the user** (2026-11-28): both the spec quiz and the implementation quiz were skipped, and the feature was implemented without them. Reason: the process felt too heavy for a feature this small. Kept as input for reviewing [ADR 0001](../docs/adr/0001-learning-path.md).
+
 - Gate (關卡): spec quiz, before implementation (see [ADR 0001](../docs/adr/0001-learning-path.md))
 - Spec: [real-total.md](real-total.md)
 - Pass mark: at least 7 of 8 answers right (80%), and all 4 key questions right
@@ -52,4 +54,4 @@ Answer:
 
 ## Grading (批改)
 
-(Claude grades after all answers are in.)
+Not graded: the quiz was skipped.
